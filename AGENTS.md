@@ -71,3 +71,6 @@ Repository: https://github.com/Noobi-Programmer/Innovatex
   names may be listed; values never.
 - After every task (including a failed one), update `AGENT_HANDOVER.md` with the branch,
   commit hash, real verification results, and the next task.
+- `AGENT_HANDOVER.md` is shared: merge your section into it, never replace it wholesale,
+  and re-read it immediately before editing — another session may have just updated it.
+  Confirm your update survived (`git status` clean for the file) before claiming it.
