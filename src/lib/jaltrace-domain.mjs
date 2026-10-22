@@ -121,6 +121,54 @@ const deliveryLitresFrom = (delivery) => {
   return { valid: true, litres: delivery.acknowledgedLitres, reason: null };
 };
 
+const safeReconciliationLimits = (tolerance, criticalThreshold) => {
+  const safeTolerance = normalizeFraction(tolerance, DEFAULT_RECONCILIATION_OPTIONS.tolerance);
+  const safeCriticalThreshold = Math.max(
+    safeTolerance,
+    normalizeFraction(criticalThreshold, DEFAULT_RECONCILIATION_OPTIONS.criticalThreshold),
+  );
+  return { safeTolerance, safeCriticalThreshold };
+};
+
+const compareVolumes = ({ referenceLitres, observedLitres, referenceLabel, observedLabel, tolerance, criticalThreshold }) => {
+  const { safeTolerance, safeCriticalThreshold } = safeReconciliationLimits(tolerance, criticalThreshold);
+  const signedDifferenceLitres = referenceLitres - observedLitres;
+  const differenceLitres = Math.abs(signedDifferenceLitres);
+  const differenceRatio = referenceLitres === 0
+    ? (observedLitres === 0 ? 0 : Infinity)
+    : differenceLitres / referenceLitres;
+  const differencePercent = differenceRatio * 100;
+
+  let status = 'matched';
+  if (differenceRatio > safeTolerance && differenceRatio < safeCriticalThreshold) status = 'warning';
+  if (differenceRatio >= safeCriticalThreshold) status = 'critical';
+
+  const reasons = [];
+  const nextActions = [];
+  if (status === 'matched') {
+    reasons.push(`${observedLabel} is within ${(safeTolerance * 100).toFixed(2)}% tolerance of ${referenceLabel}.`);
+  } else {
+    const direction = signedDifferenceLitres >= 0 ? 'below' : 'above';
+    reasons.push(`${observedLitres} L ${observedLabel} is ${direction} ${referenceLabel}; difference is ${differencePercent.toFixed(6)}% of ${referenceLabel}.`);
+    if (status === 'critical') reasons.push(`Difference meets or exceeds the ${(safeCriticalThreshold * 100).toFixed(2)}% critical threshold.`);
+    nextActions.push(`Check ${referenceLabel} and ${observedLabel} meter calibration and units.`);
+    nextActions.push('Confirm the timestamps and event IDs refer to the same fill or delivery.');
+    nextActions.push('Check retained water, spills, line storage and manual-entry errors before escalating.');
+  }
+
+  return {
+    signedDifferenceLitres,
+    differenceLitres,
+    differenceRatio,
+    differencePercent,
+    status,
+    reasons,
+    nextActions,
+    tolerance: safeTolerance,
+    criticalThreshold: safeCriticalThreshold,
+  };
+};
+
 /**
  * Reconcile loading quantity against delivery acknowledgement.
  * differenceLitres is absolute; signedDifferenceLitres is loading minus delivery.
@@ -156,41 +204,28 @@ export function reconcileLoadingDelivery({
     };
   }
 
-  const safeTolerance = normalizeFraction(tolerance, DEFAULT_RECONCILIATION_OPTIONS.tolerance);
-  const safeCriticalThreshold = Math.max(
-    safeTolerance,
-    normalizeFraction(criticalThreshold, DEFAULT_RECONCILIATION_OPTIONS.criticalThreshold),
-  );
-  const signedDifferenceLitres = loadingValue.litres - deliveryValue.litres;
-  const differenceLitres = Math.abs(signedDifferenceLitres);
-  const differenceRatio = loadingValue.litres === 0
-    ? (deliveryValue.litres === 0 ? 0 : Infinity)
-    : differenceLitres / loadingValue.litres;
-  const differencePercent = differenceRatio * 100;
-
-  let status = 'matched';
-  if (differenceRatio > safeTolerance && differenceRatio < safeCriticalThreshold) status = 'warning';
-  if (differenceRatio >= safeCriticalThreshold) status = 'critical';
-
-  if (status === 'matched') {
-    reasons.push(`Delivery is within ${(safeTolerance * 100).toFixed(2)}% tolerance.`);
-  } else {
-    const direction = signedDifferenceLitres >= 0 ? 'below loading' : 'above loading';
-    reasons.push(`${differenceLitres} L ${direction}; difference is ${differencePercent.toFixed(6)}% of loading.`);
-    if (status === 'critical') reasons.push(`Difference meets or exceeds the ${(safeCriticalThreshold * 100).toFixed(2)}% critical threshold.`);
-  }
+  const comparison = compareVolumes({
+    referenceLitres: loadingValue.litres,
+    observedLitres: deliveryValue.litres,
+    referenceLabel: 'loading volume',
+    observedLabel: 'delivery acknowledgement',
+    tolerance,
+    criticalThreshold,
+  });
+  reasons.push(...comparison.reasons);
 
   return {
     loadingLitres: loadingValue.litres,
     deliveryLitres: deliveryValue.litres,
-    differenceLitres,
-    signedDifferenceLitres,
-    differencePercent,
-    differenceRatio,
-    status,
+    differenceLitres: comparison.differenceLitres,
+    signedDifferenceLitres: comparison.signedDifferenceLitres,
+    differencePercent: comparison.differencePercent,
+    differenceRatio: comparison.differenceRatio,
+    status: comparison.status,
     reasons,
-    tolerance: safeTolerance,
-    criticalThreshold: safeCriticalThreshold,
+    nextActions: comparison.nextActions,
+    tolerance: comparison.tolerance,
+    criticalThreshold: comparison.criticalThreshold,
     source: sourceOf(loading || delivery),
     provenance: {
       loadingId: loading.id,
@@ -198,6 +233,112 @@ export function reconcileLoadingDelivery({
       loadingSourceEventIds: [...loading.sourceEventIds],
       deliverySourceEventIds: [...delivery.sourceEventIds],
     },
+  };
+}
+
+/**
+ * Reconcile accepted extraction telemetry against a linked loading event.
+ * The loading event must name the source telemetry IDs; the engine never
+ * guesses which readings belong to a fill.
+ * @param {{telemetry?: object|null, loading?: object|null, tolerance?: number, criticalThreshold?: number}} input
+ */
+export function reconcileExtractionLoading({
+  telemetry = null,
+  loading = null,
+  tolerance = DEFAULT_RECONCILIATION_OPTIONS.tolerance,
+  criticalThreshold = DEFAULT_RECONCILIATION_OPTIONS.criticalThreshold,
+} = {}) {
+  const reasons = [];
+  const sourceEventIds = Array.isArray(loading?.sourceEventIds) ? loading.sourceEventIds : [];
+  const acceptedReadings = Array.isArray(telemetry?.acceptedReadings) ? telemetry.acceptedReadings : [];
+
+  if (!loading) reasons.push('No loading record is available to reconcile against extraction telemetry.');
+  if (sourceEventIds.length === 0) reasons.push('Loading record has no source telemetry linkage.');
+
+  const acceptedById = new Map(acceptedReadings.map((reading) => [reading.id, reading]));
+  const linkedReadings = sourceEventIds.map((id) => acceptedById.get(id)).filter(Boolean);
+  const missingSourceIds = sourceEventIds.filter((id) => !acceptedById.has(id));
+  if (missingSourceIds.length > 0) reasons.push(`Loading record references unavailable source telemetry: ${missingSourceIds.join(', ')}.`);
+  if (linkedReadings.length < 2) reasons.push('At least two accepted source telemetry readings are required to calculate extraction volume.');
+
+  if (!loading || sourceEventIds.length === 0 || missingSourceIds.length > 0 || linkedReadings.length < 2) {
+    return {
+      sourceLitres: null,
+      loadingLitres: null,
+      differenceLitres: null,
+      signedDifferenceLitres: null,
+      differencePercent: null,
+      status: 'missing',
+      reasons,
+      nextActions: [
+        'Confirm the loading record exists and contains the source telemetry IDs for the same fill.',
+        'Restore or review rejected source readings before treating the chain as complete.',
+      ],
+      tolerance,
+      criticalThreshold,
+      source: loading?.source ?? telemetry?.source ?? 'simulated',
+      provenance: { loadingId: loading?.id ?? null, sourceEventIds, acceptedTelemetryIds: linkedReadings.map((reading) => reading.id) },
+    };
+  }
+
+  const sourceDelta = cumulativeDelta(linkedReadings[0].cumulativeLitres, linkedReadings.at(-1).cumulativeLitres);
+  if (!sourceDelta.valid) {
+    return {
+      sourceLitres: null,
+      loadingLitres: null,
+      differenceLitres: null,
+      signedDifferenceLitres: null,
+      differencePercent: null,
+      status: 'unverified',
+      reasons: [...reasons, sourceDelta.reason],
+      nextActions: ['Review the linked source readings for meter resets, clock problems or impossible cumulative values.'],
+      tolerance,
+      criticalThreshold,
+      source: loading?.source ?? telemetry?.source ?? 'simulated',
+      provenance: { loadingId: loading.id, sourceEventIds, acceptedTelemetryIds: linkedReadings.map((reading) => reading.id) },
+    };
+  }
+
+  const loadingValue = loadingLitresFrom(loading);
+  if (!loadingValue.valid) {
+    return {
+      sourceLitres: sourceDelta.litres,
+      loadingLitres: null,
+      differenceLitres: null,
+      signedDifferenceLitres: null,
+      differencePercent: null,
+      status: 'missing',
+      reasons: [...reasons, loadingValue.reason],
+      nextActions: ['Add a usable loading quantity or loading-meter delta before comparing source and load.'],
+      tolerance,
+      criticalThreshold,
+      source: loading?.source ?? telemetry?.source ?? 'simulated',
+      provenance: { loadingId: loading.id, sourceEventIds, acceptedTelemetryIds: linkedReadings.map((reading) => reading.id) },
+    };
+  }
+
+  const comparison = compareVolumes({
+    referenceLitres: sourceDelta.litres,
+    observedLitres: loadingValue.litres,
+    referenceLabel: 'extraction volume',
+    observedLabel: 'loading volume',
+    tolerance,
+    criticalThreshold,
+  });
+  return {
+    sourceLitres: sourceDelta.litres,
+    loadingLitres: loadingValue.litres,
+    differenceLitres: comparison.differenceLitres,
+    signedDifferenceLitres: comparison.signedDifferenceLitres,
+    differencePercent: comparison.differencePercent,
+    differenceRatio: comparison.differenceRatio,
+    status: comparison.status,
+    reasons: [...reasons, ...comparison.reasons],
+    nextActions: comparison.nextActions,
+    tolerance: comparison.tolerance,
+    criticalThreshold: comparison.criticalThreshold,
+    source: loading?.source ?? telemetry?.source ?? 'simulated',
+    provenance: { loadingId: loading.id, sourceEventIds, acceptedTelemetryIds: linkedReadings.map((reading) => reading.id) },
   };
 }
 
@@ -345,17 +486,40 @@ export function evaluateExtractionThreshold({ extractedLitres, thresholdLitres, 
   };
 }
 
+const STATUS_PRIORITY = Object.freeze({
+  critical: 70,
+  missing: 60,
+  'threshold-review': 50,
+  stale: 45,
+  warning: 40,
+  unverified: 30,
+  recovered: 20,
+  matched: 10,
+});
+
+const mostSevereStatus = (statuses) => statuses
+  .filter(Boolean)
+  .sort((left, right) => (STATUS_PRIORITY[right] ?? 0) - (STATUS_PRIORITY[left] ?? 0))[0] ?? 'matched';
+
 /** Evaluate one deterministic fixture into renderable evidence. */
 export function evaluateScenario(fixture, options = {}) {
   const telemetry = validateTelemetry(fixture.telemetry ?? [], options.telemetry);
   const result = {
     scenarioId: fixture.id,
     scenario: fixture.name,
-    source: fixture.source ?? 'simulated',
-    provenance: fixture.provenance ?? null,
-    telemetry,
+      source: fixture.source ?? 'simulated',
+      provenance: fixture.provenance ?? null,
+      telemetry,
   };
 
+  if (fixture.loading) {
+    result.sourceLoading = reconcileExtractionLoading({
+      telemetry,
+      loading: fixture.loading,
+      tolerance: options.tolerance,
+      criticalThreshold: options.criticalThreshold,
+    });
+  }
   if (fixture.loading || fixture.delivery) {
     result.reconciliation = reconcileLoadingDelivery({
       loading: fixture.loading ?? null,
@@ -374,12 +538,15 @@ export function evaluateScenario(fixture, options = {}) {
       after: detectStaleTelemetry(fixture.recovery.after.lastTimestamp, fixture.recovery.after.scenarioNow, fixture.recovery.after.maxAgeMs),
     };
     result.status = result.recovery.after.stale ? 'stale' : 'recovered';
-  } else if (result.threshold) result.status = result.threshold.status;
-  else if (result.freshness?.stale) result.status = 'stale';
-  else if (result.reconciliation) result.status = result.reconciliation.status;
-  else if (telemetry.issues.length > 0) result.status = 'unverified';
-  else result.status = 'matched';
+  } else {
+    result.status = mostSevereStatus([
+      result.sourceLoading?.status,
+      result.reconciliation?.status,
+      result.threshold?.status,
+      result.freshness?.stale ? 'stale' : null,
+      telemetry.issues.length > 0 ? 'unverified' : null,
+    ]);
+  }
 
   return result;
 }
-

@@ -7,6 +7,7 @@ import {
   evaluateScenario,
   findMissingLinkage,
   getScenarioFixture,
+  reconcileExtractionLoading,
   reconcileLoadingDelivery,
   SCENARIO_NAMES,
   validateTelemetry,
@@ -33,6 +34,28 @@ test('quantity mismatch reports exactly 700 L and 11.666...% using loading as de
   assert.equal(result.signedDifferenceLitres, 700);
   assert.equal(result.differencePercent, (700 / 6000) * 100);
   assert.equal(result.status, 'critical');
+});
+
+test('source-to-load reconciliation uses linked telemetry and exposes investigation actions', () => {
+  const result = evaluateScenario(getScenarioFixture('source-load-mismatch'));
+  assert.equal(result.sourceLoading.sourceLitres, 10000);
+  assert.equal(result.sourceLoading.loadingLitres, 8800);
+  assert.equal(result.sourceLoading.differenceLitres, 1200);
+  assert.equal(result.sourceLoading.differencePercent, 12);
+  assert.equal(result.sourceLoading.status, 'critical');
+  assert.match(result.sourceLoading.nextActions.join(' '), /calibration/);
+  assert.equal(result.reconciliation.status, 'matched');
+  assert.equal(result.status, 'critical');
+});
+
+test('source-to-load reconciliation refuses unlinked source telemetry instead of guessing', () => {
+  const result = reconcileExtractionLoading({
+    telemetry: { acceptedReadings: [{ id: 'telemetry-only-001', cumulativeLitres: 1000 }] },
+    loading: { id: 'loading-unlinked-001', reportedLitres: 1000, sourceEventIds: ['missing-source-001'] },
+  });
+  assert.equal(result.status, 'missing');
+  assert.match(result.reasons.join(' '), /unavailable source telemetry/);
+  assert.equal(result.sourceLitres, null);
 });
 
 test('tolerance defaults to 5 percent and 4 percent does not create a false alarm', () => {
@@ -90,7 +113,7 @@ test('missing linkage is explicit and does not fabricate a match', () => {
 });
 
 test('all named fixtures are deterministic, source-labelled, and stable across runs', () => {
-  assert.deepEqual(SCENARIO_NAMES, ['normal-match', 'quantity-mismatch', 'missing-load', 'duplicate-out-of-order', 'impossible-reading', 'stale-telemetry', 'threshold-review', 'recovery', 'normal-no-false-alarm']);
+  assert.deepEqual(SCENARIO_NAMES, ['normal-match', 'quantity-mismatch', 'source-load-mismatch', 'missing-load', 'duplicate-out-of-order', 'impossible-reading', 'stale-telemetry', 'threshold-review', 'recovery', 'normal-no-false-alarm']);
   for (const name of SCENARIO_NAMES) {
     const first = evaluateScenario(getScenarioFixture(name));
     const second = evaluateScenario(getScenarioFixture(name));
@@ -103,6 +126,7 @@ test('all named fixtures are deterministic, source-labelled, and stable across r
 test('scenario outcomes cover match, mismatch, stale, threshold review, recovery, and no false alarm', () => {
   assert.equal(evaluateScenario(getScenarioFixture('normal-match')).status, 'matched');
   assert.equal(evaluateScenario(getScenarioFixture('quantity-mismatch')).status, 'critical');
+  assert.equal(evaluateScenario(getScenarioFixture('source-load-mismatch')).status, 'critical');
   assert.equal(evaluateScenario(getScenarioFixture('stale-telemetry')).status, 'stale');
   assert.equal(evaluateScenario(getScenarioFixture('threshold-review')).status, 'threshold-review');
   assert.equal(evaluateScenario(getScenarioFixture('recovery')).status, 'recovered');
@@ -118,4 +142,3 @@ test('telemetry validation accepts zero readings and rejects negative flow', () 
   assert.equal(result.totalDeltaLitres, 0);
   assert.equal(result.impossibleCount, 1);
 });
-
