@@ -1,8 +1,8 @@
 # JalTrace — Groundwater Accountability & Water Distribution
 
-> **InnovateX project · Early research and validation stage**
+> **InnovateX project · Local prototype, research-gated and not production-ready**
 
-JalTrace is a proposed IoT-enabled underground water management system exploring how to reconcile groundwater extraction, tanker loading, transportation, and final delivery records in one traceable workflow.
+JalTrace is a deterministic software prototype exploring how to reconcile groundwater extraction, tanker loading, transportation, and final delivery records in one traceable workflow. The physical IoT layer is planned, not installed.
 
 **Project repository:** https://github.com/Noobi-Programmer/Innovatex
 
@@ -42,21 +42,22 @@ The prototype may initially use deterministic **simulated IoT telemetry** so the
 
 ## Current status
 
-JalTrace is in the **research and problem-validation stage**. The competition requirements and starter workspace have been inspected. The application prototype has not yet been implemented, and implementation is intentionally gated on competitor analysis and a go/no-go decision.
+JalTrace has passed the research gate for a **narrow competition prototype**. The market-gap verdict remains **INCONCLUSIVE**: the public scan found strong adjacent products, but did not prove whether the exact permit-aware source → load → delivery evidence chain is already solved.
 
 | Workstream | Status |
 |---|---|
-| Competition requirements review | Initial review complete |
-| Workspace and runtime inspection | Initial inspection complete |
-| Competitor and market validation | Pending / in progress |
-| Customer problem validation | Pending |
-| Go/no-go decision | Pending research evidence |
-| Web application | Not built yet |
-| IoT telemetry simulation | Planned, not implemented |
-| Physical sensor integration | Optional future validation; not implemented |
-| Automated tests and end-to-end demo | Not implemented |
+| Competition requirements review | Complete; see `research/competition_requirements.md` |
+| Workspace and runtime inspection | Complete; see `setup/ENVIRONMENT_REPORT.md` |
+| Competitor and market validation | Public scan complete; gap remains inconclusive |
+| Customer problem validation | Pending five operator/product conversations |
+| Go/no-go decision | GO for narrow prototype; NO-GO for unsupported novelty/production claims |
+| Web application | Implemented: pitch, demo, research and architecture pages |
+| IoT telemetry simulation | Implemented as deterministic synthetic fixtures |
+| Physical sensor integration | Not implemented; quote and safe test site required |
+| Automated domain tests | Implemented: 12 Node built-in tests |
+| Browser visual validation | Blocked in current environment; no browser binary available |
 
-## Research questions
+## Research and validation questions
 
 Before committing to the product scope, the team is investigating:
 
@@ -66,38 +67,61 @@ Before committing to the product scope, the team is investigating:
 - What evidence would be needed to distinguish a verified source from a location or identifier alone?
 - Which hardware, connectivity, calibration, maintenance, and operating costs are supported by sources versus estimates?
 
-The project scope may be narrowed or changed if the research does not establish a meaningful unmet need.
+The project must be narrowed, repositioned or pivoted if direct operator/product evidence does not establish a useful unresolved workflow.
 
-## Planned technical direction
+## Current technical direction
 
-The implementation stack has not yet been finalised. A lightweight web application with a deterministic telemetry simulator is being considered for the first demonstration. Hardware integration would be evaluated separately based on availability, cost, and what it can actually measure.
+The first demonstration is a zero-dependency local web application using Node.js, plain HTML/CSS, browser ESM modules and deterministic synthetic fixtures. It requires no API key, cloud database or paid service.
 
-A future architecture may include:
+The current application includes:
 
-- A web dashboard for source, tanker, and delivery records.
+- A five-slide web pitch at `/`.
+- An evidence-chain simulator at `/demo`.
+- A source register and competitor page at `/research`.
+- An architecture and limitations page at `/about`.
 - An event/data model that links extraction, loading, and delivery events.
 - A reconciliation layer for configurable quantity tolerances and missing-event checks.
-- A simulated telemetry generator and test scenarios.
-- Optional sensor hardware for a later proof of concept.
+- Nine deterministic scenarios and Node built-in tests.
 
-These are proposed components, not implemented features.
+A future field architecture may add compatible flow meters, pump-state sensing, a gateway with buffering, connectivity, calibration, security and operator integrations. Those components are planned and quote-required.
 
 ## Roadmap
 
-1. Complete a source-backed competitor matrix and claim register.
-2. Conduct customer discovery and define the highest-value user/problem.
-3. Record a documented **go/no-go** decision and a narrowly scoped MVP.
-4. Implement the data model, simulation scenarios, and dashboard if the research supports proceeding.
-5. Test normal operation and failure cases, documenting limitations and assumptions.
-6. Evaluate sensor integration and build a 10-minute competition demonstration.
+1. Run the local app and manually validate the visible deck and all nine scenarios in a real browser.
+2. Conduct five operator/product conversations and record null results.
+3. Request one current hardware quote and confirm the permit/NOC workflow with an authoritative source or qualified advisor.
+4. Rehearse the ten-minute pitch with the static fallback ready.
+5. Only after the evidence gate, consider a borrowed-hardware bench test with reference calibration.
 
 ## Team and constraints
 
 JalTrace is being explored by a four-member first-year computer science student team for InnovateX. The project is designed around a near-zero initial budget, so the first milestone prioritises research, software simulation, and a reproducible demo over unverified hardware claims.
 
+## Useful files and commands
+
+- `IMPLEMENTATION_STATUS.md` — current acceptance state, checks and blockers.
+- `research/GO_NO_GO.md` — research decision and pivot trigger.
+- `research/source_register.md` — cited claims, dates, confidence and limitations.
+- `presentation/SLIDE_CONTENT.md` — exact five-slide content and fallback narration.
+- `presentation/PITCH_SCRIPT.md` — timed script and judge Q&A.
+- `docs/COST_MODEL.md` — ₹0 software distinction and quote-required pilot costs.
+- `docs/IMPACT_AND_VALIDATION.md` — what the demo proves and how to validate impact.
+- `docs/TEAM_PLAN.md` — four-person ownership, two-day plan and fallbacks.
+
+Run the project locally:
+
+```bash
+npm test
+npm run check
+npm run build
+npm start
+```
+
+Then open `http://localhost:4173/`. The server also exposes `/demo`, `/research` and `/about`.
+
 ## Contributing and project status
 
-This repository is currently a project workspace, not a released product. Technical choices, requirements, and feature status may change as evidence is collected. Please treat the roadmap and proposed architecture as plans until implementation and testing are documented.
+This repository is a local competition workspace, not a released product. The deterministic software behavior is tested, but market validation, browser visual validation in the current environment, hardware integration and production deployment remain open.
 
 ## Disclaimer
 

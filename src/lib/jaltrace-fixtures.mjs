@@ -23,6 +23,15 @@ const FIXTURES = {
     loading: loading('quantity-mismatch', { id: 'loading-mismatch-001', wellId: 'well-demo-01', tankerId: 'tanker-demo-02', timestamp: '2026-10-21T09:11:00.000Z', startLitres: 20000, endLitres: 26000, reportedLitres: 6000, measurementMethod: 'simulated-meter', sourceEventIds: ['telemetry-mismatch-001', 'telemetry-mismatch-002'] }),
     delivery: delivery('quantity-mismatch', { id: 'delivery-mismatch-001', tankerId: 'tanker-demo-02', orderId: 'order-demo-02', recipientId: 'recipient-demo-02', timestamp: '2026-10-21T09:30:00.000Z', acknowledgedLitres: 5300, measurementMethod: 'receiver-acknowledgement', sourceEventIds: ['loading-mismatch-001'] }),
   },
+  'source-load-mismatch': {
+    id: 'scenario-source-load-mismatch', name: 'source-load-mismatch', source: SOURCE, provenance: provenance('source-load-mismatch'),
+    telemetry: telemetry('source-load-mismatch', [
+      { id: 'telemetry-source-load-001', wellId: 'well-demo-08', timestamp: '2026-10-21T09:45:00.000Z', cumulativeLitres: 40000, flowRateLpm: 0, pumpState: 'off' },
+      { id: 'telemetry-source-load-002', wellId: 'well-demo-08', timestamp: '2026-10-21T10:05:00.000Z', cumulativeLitres: 50000, flowRateLpm: 500, pumpState: 'on' },
+    ]),
+    loading: loading('source-load-mismatch', { id: 'loading-source-load-001', wellId: 'well-demo-08', tankerId: 'tanker-demo-08', timestamp: '2026-10-21T10:06:00.000Z', startLitres: 40000, endLitres: 50000, reportedLitres: 8800, measurementMethod: 'simulated-meter', sourceEventIds: ['telemetry-source-load-001', 'telemetry-source-load-002'] }),
+    delivery: delivery('source-load-mismatch', { id: 'delivery-source-load-001', tankerId: 'tanker-demo-08', orderId: 'order-demo-08', recipientId: 'recipient-demo-08', timestamp: '2026-10-21T10:25:00.000Z', acknowledgedLitres: 8800, measurementMethod: 'receiver-acknowledgement', sourceEventIds: ['loading-source-load-001'] }),
+  },
   'missing-load': {
     id: 'scenario-missing-load', name: 'missing-load', source: SOURCE, provenance: provenance('missing-load'), telemetry: [],
     delivery: delivery('missing-load', { id: 'delivery-missing-load-001', tankerId: 'tanker-demo-03', orderId: 'order-demo-03', recipientId: 'recipient-demo-03', timestamp: '2026-10-21T10:30:00.000Z', acknowledgedLitres: 4000, measurementMethod: 'receiver-acknowledgement', sourceEventIds: ['unresolved-loading-demo-03'] }),
@@ -86,4 +95,3 @@ export function getScenarioFixture(name) {
 }
 export function getAllScenarioFixtures() { return SCENARIO_NAMES.map(getScenarioFixture); }
 export const JALTRACE_FIXTURES = Object.freeze(Object.fromEntries(SCENARIO_NAMES.map((name) => [name, getScenarioFixture(name)])));
-

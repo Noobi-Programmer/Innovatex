@@ -14,6 +14,18 @@ const required = [
   'src/styles.css',
   'src/lib/jaltrace-engine.mjs',
   'tests/jaltrace-domain.test.mjs',
+  'README.md',
+  'IMPLEMENTATION_STATUS.md',
+  'presentation/SLIDE_CONTENT.md',
+  'presentation/PITCH_SCRIPT.md',
+  'presentation/SOURCES.md',
+  'docs/COST_MODEL.md',
+  'docs/IMPACT_AND_VALIDATION.md',
+  'docs/TEAM_PLAN.md',
+  'AGENTS.md',
+  'AGENT_HANDOVER.md',
+  'src/lib/jaltrace-custom-check.mjs',
+  'tests/jaltrace-custom-check.test.mjs',
 ];
 
 for (const relativePath of required) {

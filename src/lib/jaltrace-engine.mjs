@@ -8,6 +8,7 @@ export {
   evaluateScenario,
   findMissingLinkage,
   permitStatusMetadata,
+  reconcileExtractionLoading,
   reconcileLoadingDelivery,
   validateTelemetry,
 } from './jaltrace-domain.mjs';
@@ -18,4 +19,3 @@ export {
   getAllScenarioFixtures,
   getScenarioFixture,
 } from './jaltrace-fixtures.mjs';
-
