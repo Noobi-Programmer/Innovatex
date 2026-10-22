@@ -55,7 +55,7 @@ if (slides.length > 0) {
 
   document.querySelectorAll('[data-demo-scenario]').forEach((button) => {
     button.addEventListener('click', () => {
-      window.location.href = `/demo?scenario=${encodeURIComponent(button.dataset.demoScenario)}`;
+      window.location.href = `demo.html?scenario=${encodeURIComponent(button.dataset.demoScenario)}`;
     });
   });
 }

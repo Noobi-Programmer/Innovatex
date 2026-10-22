@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="JalTrace — a permit-aware evidence ledger for groundwater-to-delivery events." />
     <title>JalTrace — InnovateX Theme 1</title>
-    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body class="deck-page">
     <div class="ambient-grid" aria-hidden="true"></div>
     <header class="topbar deck-topbar">
-      <a class="brand-lockup" href="/" aria-label="JalTrace home">
+      <a class="brand-lockup" href="index.html" aria-label="JalTrace home">
         <span class="brand-mark">JT</span>
         <span><strong>JalTrace</strong><small>InnovateX / Theme 1</small></span>
       </a>
@@ -30,8 +30,8 @@
             <h1>Can we reconcile a tanker’s water journey?</h1>
             <p class="hero-lede">From borewell extraction to tanker loading to delivery — JalTrace tests whether one evidence chain can make a difficult manual review explainable.</p>
             <div class="hero-actions">
-              <a class="primary-button" href="/demo">Run the simulation <span>↗</span></a>
-              <a class="text-link" href="/research">See the evidence register</a>
+              <a class="primary-button" href="demo.html">Run the simulation <span>↗</span></a>
+              <a class="text-link" href="research.html">See the evidence register</a>
             </div>
             <p class="source-note">Problem hypothesis — not a measured loss rate. All demo values are synthetic.</p>
           </div>
@@ -59,7 +59,7 @@
           <article class="competitor-card"><div class="card-number">03</div><h3>Water intelligence</h3><p>Municipal, tanker and borewell sources; building dashboards and pump insights.</p><div class="mini-tags"><span>WEGoT Aqua</span><span>LoRa / meters</span></div></article>
           <article class="competitor-card accent-card"><div class="card-number">04</div><h3>JalTrace tests</h3><p>Permit/NOC metadata + linked source/load/delivery evidence + explainable exceptions.</p><div class="mini-tags"><span>gap hypothesis</span><span>human review</span></div></article>
         </div>
-        <div class="evidence-strip"><span class="evidence-line"></span><strong>We do not claim “first.”</strong><span>We test a narrower evidence workflow that public material does not explicitly show.</span><a href="/research">Open sources ↗</a></div>
+        <div class="evidence-strip"><span class="evidence-line"></span><strong>We do not claim “first.”</strong><span>We test a narrower evidence workflow that public material does not explicitly show.</span><a href="research.html">Open sources ↗</a></div>
       </section>
 
       <section class="slide" data-slide="2" aria-roledescription="slide" aria-label="Slide 3 of 5" hidden>
@@ -75,10 +75,10 @@
 
       <section class="slide demo-slide" data-slide="3" aria-roledescription="slide" aria-label="Slide 4 of 5" hidden>
         <div class="slide-kicker"><span>04</span><span>LIVE SIMULATION</span></div>
-        <div class="split-heading"><div><p class="micro-copy">A repeatable software demonstration</p><h2>Watch the evidence chain<br /><em>break — then recover.</em></h2></div><a class="primary-button compact" href="/demo">Open full demo ↗</a></div>
+        <div class="split-heading"><div><p class="micro-copy">A repeatable software demonstration</p><h2>Watch the evidence chain<br /><em>break — then recover.</em></h2></div><a class="primary-button compact" href="demo.html">Open full demo ↗</a></div>
         <div class="demo-teaser-grid">
           <div class="demo-teaser-main"><div class="card-topline"><span class="status-dot aqua"></span><span>SIMULATION MODE — DEMO DATA</span><span class="push-right mono-label">SCENARIO: QUANTITY MISMATCH</span></div><div class="teaser-metrics"><div><span>LOADING</span><strong>6,000 <small>L</small></strong></div><div><span>DELIVERY ACK</span><strong>5,300 <small>L</small></strong></div><div class="metric-alert"><span>REVIEW</span><strong>700 <small>L</small></strong></div></div><div class="teaser-chain"><span class="chain-dot done"></span><span class="chain-bar done"></span><span class="chain-dot done"></span><span class="chain-bar alert"></span><span class="chain-dot alert"></span><span class="chain-label">source → load → delivery</span></div><div class="teaser-explanation"><span class="tag tag-critical">CRITICAL</span><p>11.67% of loading volume. Denominator shown. Human review required.</p></div></div>
-          <div class="demo-teaser-side"><span class="architecture-label">SCENARIO CONTROL</span><button class="scenario-button is-selected" type="button" data-demo-scenario="quantity-mismatch"><span>01</span> Quantity mismatch <b>↗</b></button><button class="scenario-button" type="button" data-demo-scenario="missing-load"><span>02</span> Missing load <b>↗</b></button><button class="scenario-button" type="button" data-demo-scenario="recovery"><span>03</span> Recovery <b>↗</b></button><a class="text-link" href="/demo">Play all scenarios</a></div>
+          <div class="demo-teaser-side"><span class="architecture-label">SCENARIO CONTROL</span><button class="scenario-button is-selected" type="button" data-demo-scenario="quantity-mismatch"><span>01</span> Quantity mismatch <b>↗</b></button><button class="scenario-button" type="button" data-demo-scenario="missing-load"><span>02</span> Missing load <b>↗</b></button><button class="scenario-button" type="button" data-demo-scenario="recovery"><span>03</span> Recovery <b>↗</b></button><a class="text-link" href="demo.html">Play all scenarios</a></div>
         </div>
         <div class="slide-bottom-note"><span>4 / 5</span><span>Every result is synthetic, deterministic and explainable.</span></div>
       </section>
@@ -92,7 +92,7 @@
           <article class="feasibility-card"><span class="metric-label">FIELD</span><strong>Meter + calibration pilot</strong><p>ESP32-class gateway, compatible flow meter, buffering, maintenance and reference checks.</p></article>
           <article class="feasibility-card accent-card"><span class="metric-label">IMPACT</span><strong>Measure evidence quality</strong><p>Linkage rate, detection delay, false alerts and reference-meter error — not claimed water saved.</p></article>
         </div>
-        <div class="closing-line"><span class="status-dot aqua"></span><strong>JalTrace is ready to be tested — not yet ready to be called unique.</strong><a href="/about">Architecture & limits ↗</a></div>
+        <div class="closing-line"><span class="status-dot aqua"></span><strong>JalTrace is ready to be tested — not yet ready to be called unique.</strong><a href="about.html">Architecture & limits ↗</a></div>
       </section>
     </main>
 
@@ -107,6 +107,6 @@
       <button class="control-button" id="next-slide" type="button" aria-label="Next slide"><span>Next</span> →</button>
       <span class="key-hint"><span class="keycap">←</span><span class="keycap">→</span> navigate <span class="keycap">N</span> notes</span>
     </footer>
-    <script type="module" src="/src/app.js"></script>
+    <script type="module" src="./src/app.js"></script>
   </body>
 </html>

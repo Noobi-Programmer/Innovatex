@@ -202,7 +202,7 @@ function notify(message) {
 function setScenario(name) {
   selectedScenario = SCENARIO_NAMES.includes(name) ? name : 'normal-match';
   playbackStep = 0;
-  history.replaceState(null, '', `/demo?scenario=${encodeURIComponent(selectedScenario)}`);
+  history.replaceState(null, '', `demo.html?scenario=${encodeURIComponent(selectedScenario)}`);
   renderScenario();
 }
 
