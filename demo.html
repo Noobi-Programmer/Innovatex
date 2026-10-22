@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="JalTrace deterministic source-to-delivery simulation." />
+    <title>JalTrace Demo — Evidence Ledger</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body class="app-page">
+    <div class="ambient-grid" aria-hidden="true"></div>
+    <header class="topbar app-topbar">
+      <a class="brand-lockup" href="/" aria-label="Back to JalTrace pitch">
+        <span class="brand-mark">JT</span>
+        <span><strong>JalTrace</strong><small>Evidence ledger / live demo</small></span>
+      </a>
+      <nav class="app-nav" aria-label="Application navigation"><a href="/">Pitch</a><a class="is-active" href="/demo">Demo</a><a href="/research">Research</a><a href="/about">Architecture</a></nav>
+      <span class="simulation-badge"><span class="status-dot aqua"></span>SIMULATION MODE</span>
+    </header>
+
+    <main class="app-main demo-main">
+      <section class="demo-heading"><div><p class="micro-copy">JALTRACE / CONTROL ROOM</p><h1>Evidence chain simulator</h1><p class="page-lede">Trigger a deterministic scenario and inspect what the system can prove, what it cannot, and what needs a human review.</p></div><div class="heading-stamp"><span>THEME 1</span><strong>UNDERGROUND WATER<br />MANAGEMENT</strong><small>All values synthetic</small></div></section>
+
+      <section class="demo-toolbar" aria-label="Scenario controls"><div class="scenario-picker"><label for="scenario-select">Scenario</label><select id="scenario-select"></select></div><div class="toolbar-actions"><button class="secondary-button" id="reset-scenario" type="button">Reset</button><button class="secondary-button" id="step-scenario" type="button">Step</button><button class="primary-button compact" id="play-scenario" type="button">Play scenario</button></div><div class="clock-readout"><span>SCENARIO CLOCK</span><strong id="scenario-clock">—</strong></div></section>
+
+      <section class="demo-layout">
+        <div class="demo-primary-column">
+          <div class="demo-status-row"><div><span class="eyebrow">CURRENT DECISION</span><h2 id="scenario-title">—</h2></div><div class="status-summary" id="status-summary">—</div></div>
+          <div class="event-chain-card" id="event-chain-card"><div class="card-topline"><span class="status-dot aqua"></span><span>SIMULATED EVENT CHAIN</span><span class="push-right mono-label" id="source-label">—</span></div><div class="event-chain" id="event-chain"></div></div>
+          <div class="metrics-grid" id="metrics-grid"></div>
+          <div class="lower-grid"><section class="panel chart-panel"><div class="panel-head"><div><span class="eyebrow">VOLUME TRACE</span><h3>Cumulative source reading</h3></div><span class="unit-label">L / simulated timestamp</span></div><div class="chart-wrap" id="volume-chart" role="img" aria-label="Cumulative volume chart"></div><div class="chart-legend"><span><i class="legend-dot source"></i>accepted telemetry</span><span><i class="legend-dot invalid"></i>rejected / anomaly</span></div></section><section class="panel explanation-panel"><div class="panel-head"><div><span class="eyebrow">WHY THIS STATUS?</span><h3 id="result-heading">—</h3></div></div><div class="explanation-copy" id="explanation-copy"></div><div class="formula-box" id="formula-box"></div></section></div>
+        </div>
+        <aside class="demo-side-column"><section class="panel source-panel"><div class="panel-head"><div><span class="eyebrow">SOURCE EVIDENCE</span><h3>Permit metadata</h3></div><span class="tag" id="permit-tag">—</span></div><div id="permit-copy" class="side-copy"></div><div class="data-list" id="source-details"></div></section><section class="panel audit-panel"><div class="panel-head"><div><span class="eyebrow">AUDIT TRAIL</span><h3>What the engine saw</h3></div><span class="mono-label" id="issue-count">0 issues</span></div><div class="audit-list" id="audit-list"></div></section><section class="panel demo-guardrail"><span class="status-dot amber"></span><p>A mismatch is an exception for investigation — never proof of fraud, theft, illegality or contamination.</p></section></aside>
+      </section>
+    </main>
+    <div class="toast" id="demo-toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/src/demo.js"></script>
+  </body>
+</html>
